@@ -34,29 +34,38 @@ class SongkickApiHandler:
         request_artist = artist.replace(" ", "%20", 10)
         request_result = urllib.request.urlopen("http://api.songkick.com/api/3.0/search/artists.json?query=" + request_artist + "&apikey=" + self.key).read()
         data = json.loads(request_result)
-        return [SongkickApiHandler.Artist(x) for x in data["resultsPage"]["results"]["artist"] if x["displayName"] == artist]
+        try: 
+            return [SongkickApiHandler.Artist(x) for x in data["resultsPage"]["results"]["artist"] if x["displayName"] == artist]
+        except: 
+            return None
 
     def getEvents(self, artist_id): 
-        if not isinstance(artist_id, numbers.Number): 
-            artist_id = self.getArtist(artist_id)[0].id
+        try: 
+            if not isinstance(artist_id, numbers.Number): 
+                artist_id = self.getArtist(artist_id)[0].id
+        except: 
+            return None
 
         request_result = urllib.request.urlopen("http://api.songkick.com/api/3.0/artists/" + str(artist_id) + "/calendar.json?apikey=" + self.key).read()
         data = json.loads(request_result)
 
-        return [SongkickApiHandler.Event(x) for x in data["resultsPage"]["results"]["event"]]
-
+        try: 
+            return [SongkickApiHandler.Event(x) for x in data["resultsPage"]["results"]["event"]]
+        except: 
+            return None
     
 
 if __name__ == "__main__": 
     key = "9zi29VLYNibBY6WS"
     s = SongkickApiHandler(key)
-    band = "ASP"
+    band = "Kalmah"
     if len(sys.argv) > 1: 
         band = sys.argv[1]
     events = s.getEvents(band)
 
-    for event in events: 
-        pprint(event.venue + " - " + str(event.start))
+    if events: 
+        for event in events: 
+            pprint(event.venue + " - " + str(event.start))
         
 
     
